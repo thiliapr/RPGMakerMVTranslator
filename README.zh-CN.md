@@ -10,8 +10,8 @@
 - 版权: 根据GPL-3.0或更高版本分发。
 
 ## 语言
-- [简体中文](jsonpath.zh-CN.md)
-- [English](jsonpath.md)
+- [简体中文](README.zh-CN.md)
+- [English](README.md)
 
 ## 用法
 详见文档中[用法](docs/usage.zh-CN.md)一章。

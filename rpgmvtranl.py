@@ -30,18 +30,16 @@ def create_dir(at: str):
 			os.remove(at)
 		else:
 			return
-	os.mkdir(at)
+	os.makedirs(at)
 
 
-def extract_script(data_path: str, output_path: str, events_code: list[int], without_name: bool, verbose: bool = False):
+def extract_script(data_path: str, output_path: str, events_code: list[int], verbose: bool = False):
 	# Read data files from data path
 	log(f"Loading Data...")
 
 	data_files = {}
 	for filename in os.listdir(data_path):
 		if not filename.endswith(".json"):
-			continue
-		if filename == "System.json":
 			continue
 
 		if verbose:
@@ -62,8 +60,10 @@ def extract_script(data_path: str, output_path: str, events_code: list[int], wit
 
 		if filename == "CommonEvents.json":
 			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.common_events(data, events_code)]
+		elif filename == "System.json":
+			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.system_json(data)]
 		elif isinstance(data, list):
-			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.items(data, without_name)]
+			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.items(data)]
 		elif isinstance(data, dict):
 			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.map_events(data, events_code)]
 
@@ -174,7 +174,6 @@ def main():
 	parser.add_argument("-g", "--galtransl-script", help="GalTransl Script Path (galtransl, apply)")
 	parser.add_argument("-t", "--translated-data", help="Translated Data Path (apply)")
 	parser.add_argument("-e", "--only-needed-events", action="store_true", help="Translate only displayable events.")
-	parser.add_argument("-n", "--without-name", action="store_true", help="Do not translate names.")
 	parser.add_argument("-v", "--verbose", action="store_true", default=False)
 	parser.add_argument("-V", "--version", action="version", version=__version__, help="Show version")
 	args = parser.parse_args()
@@ -188,7 +187,7 @@ def main():
 
 	# Do command
 	if args.action == "extract":
-		extract_script(args.data, args.rpgmaker_script, events_code, args.without_name, args.verbose)
+		extract_script(args.data, args.rpgmaker_script, events_code, args.verbose)
 	elif args.action == "galtransl":
 		generate_galtransl_script(args.rpgmaker_script, args.galtransl_script, args.verbose)
 	elif args.action == "apply":

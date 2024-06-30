@@ -5,9 +5,10 @@ class RPGMakerMVData:
 	@staticmethod
 	def event(event: jsonpath.JSONObject, parent_path: str, events_code: list[int]) -> list[str] | None:
 		if event["code"] not in events_code:
-			return
+			return []
+
 		# Choices
-		elif event["code"] == 102:
+		if event["code"] == 102:
 			return [jsonpath.concat_path(parent_path, f"$.parameters[0][{i}]") for i in range(len(event["parameters"][0])) if event["parameters"][0][i]]
 		# Comment
 		elif event["code"] == 108:
@@ -17,56 +18,63 @@ class RPGMakerMVData:
 			return [jsonpath.concat_path(parent_path, "$.parameters[0]")] if event["parameters"][0] else []
 
 	@staticmethod
-	def items(items: list, without_name: bool = True) -> list[str]:
-		messages: list[str] = []
-		for item_index in range(len(items)):
-			item = items[item_index]
-			if item is None:
-				continue
-
-			for key in ("description", "message1", "message2", "message3", "message4"):
-				if item.get(key):
-					messages.append(f"$[{item_index}].{key}")
-
-			if not without_name and item.get("name"):
-				messages.append(f"$[{item_index}].name")
-
+	def items(items: list) -> list[str]:
+		messages: list[str] = [
+			message_path
+			for item_index in range(len(items))
+			for message_path in (
+				[f"$[{item_index}].{key}" for key in ("name", "description", "message1", "message2", "message3", "message4") if items[item_index].get(key)]
+				if items[item_index] else []
+			)
+		]
+		
 		return messages
 
 	@staticmethod
 	def map_events(map_events: dict, events_code: list[int]) -> list[str]:
-		messages: list[str] = []
-
-		for map_event_index in range(len(map_events["events"])):
-			map_event = map_events["events"][map_event_index]
-			if map_event is None:
-				continue
-
-			for page_index in range(len(map_event["pages"])):
-				page = map_event["pages"][page_index]
-
-				for event_index in range(len(page["list"])):
-					event = page["list"][event_index]
-
-					event_messages = RPGMakerMVData.event(event, f"$.events[{map_event_index}].pages[{page_index}].list[{event_index}]", events_code)
-					if event_messages:
-						messages += event_messages
+		messages: list[str] = [
+			message_path
+			for map_event_index in range(len(map_events["events"]))
+			for page_index in range(len(map_events["events"][map_event_index]["pages"] if map_events["events"][map_event_index] else []))
+			for event_index in range(len(map_events["events"][map_event_index]["pages"][page_index]["list"]))
+			for message_path in RPGMakerMVData.event(map_events["events"][map_event_index]["pages"][page_index]["list"][event_index], f"$.events[{map_event_index}].pages[{page_index}].list[{event_index}]", events_code)
+		]
 
 		return messages
 
 	@staticmethod
 	def common_events(events: list, events_code: list[int]) -> list[str]:
+		messages: list[str] = [
+			message_path
+			for common_event_index in range(len(events))
+			for event_index in range(len(events[common_event_index]["list"] if events[common_event_index] else []))
+			for message_path in RPGMakerMVData.event(events[common_event_index]["list"][event_index], f"$[{common_event_index}].list[{event_index}]", events_code)
+		]
+
+		return messages
+
+	@staticmethod
+	def system_json(system_json: dict) -> list[str]:
 		messages: list[str] = []
-		for common_event_index in range(len(events)):
-			common_event = events[common_event_index]
-			if common_event is None:
-				continue
 
-			for event_index in range(len(common_event["list"])):
-				event = common_event["list"][event_index]
+		# Outside
+		messages.append("$.currencyUnit")
+		messages.append("$.gameTitle")
 
-				message = RPGMakerMVData.event(event, f"$[{common_event_index}].list[{event_index}]", events_code)
-				if message:
-					messages += message
+		# Add items to messages
+		messages += [
+			f"$.{items_key}[{item_index}]"
+			for items_key in ("armorTypes", "elements", "equipTypes", "skillTypes", "weaponTypes")
+			for item_index in range(len(system_json[items_key]))
+			if system_json[items_key][item_index]
+		]
+
+		# Terms
+		messages += [
+			f"$.terms.{term_key}.{('[%s]' if isinstance(system_json['terms'][term_key], list) else '%s') % item_key}"
+			for term_key in system_json["terms"]
+			for item_key in (system_json["terms"][term_key] if isinstance(system_json["terms"][term_key], dict) else range(len(system_json["terms"][term_key])))
+			if system_json["terms"][term_key][item_key]
+		]
 
 		return messages

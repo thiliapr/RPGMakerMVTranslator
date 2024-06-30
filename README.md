@@ -6,7 +6,7 @@
 
 # RPG Maker MV Translator
 A translation tool for games made with `RPG Maker MV` or `RPG Maker MZ`.
-- Version: 1.0.0
+- Version: 1.0.1
 - License: Distributed under GPL-3.0 or later.
 
 ## Languages

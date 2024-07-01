@@ -1,6 +1,6 @@
 import argparse
 import os
-import time
+from datetime import datetime
 import json
 
 from tprtools import jsonpath
@@ -18,10 +18,13 @@ __version__ = "1.0.1"
 def log(message: str, verbose: bool = False) -> None:
 	message = message.replace("\n", "\\n").replace("\\", "\\\\")
 
+	date = datetime.now()
+	time_format = "[%02d:%02d:%02d.%03d]" % (date.hour, date.minute, date.second, date.microsecond / 1000)
+
 	if verbose:
-		print(time.strftime("[%Y-%m-%d] [%H:%M:%S]"), "[verbose]", message)
+		print(time_format, "[verbose]", message)
 	else:
-		print(time.strftime("[%Y-%m-%d] [%H:%M:%S]"), message)
+		print(time_format, message)
 
 
 def create_dir(at: str):
@@ -145,7 +148,8 @@ def apply_script(data_path: str, rpgmaker_script_path: str, galtransl_script_pat
 
 	# Merge translation and path
 	rpgmaker_translations = {
-		filename: [rpgmaker_message | translation_message for rpgmaker_message, translation_message in zip(rpgmaker_messages, translation_messages)]
+		filename: [rpgmaker_message | translation_message
+		for rpgmaker_message, translation_message in zip(rpgmaker_messages, translation_messages)]
 		for filename, rpgmaker_messages, translation_messages in zip(rpgmaker_scripts.keys(), rpgmaker_scripts.values(), galtransl_scripts.values())
 	}
 

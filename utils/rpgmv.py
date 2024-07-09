@@ -33,11 +33,25 @@ class RPGMakerMVData:
 		return messages
 
 	@staticmethod
+	def troops(troops: list, events_code: list[int]) -> list[str]:
+		messages: list[str] = RPGMakerMVData.items(troops)
+
+		# Events
+		messages += [
+			for troop_index in range(len(troops))
+			for page_index in range(len(troops[troop_index]["pages"] if troops[troop_index]) else 0)
+			for event_index in range(len(troops[troop_index]["pages"][page_index]["list"]))
+			for message_path in RPGMakerMVData.event(troops[troop_index]["pages"][page_index]["list"][event_index], f"$[{troop_index}].pages[{page_index}].list[{event_index}]", events_code)
+		]
+
+		return messages
+
+	@staticmethod
 	def map_events(map_events: dict, events_code: list[int]) -> list[str]:
 		messages: list[str] = [
 			message_path
 			for map_event_index in range(len(map_events["events"]))
-			for page_index in range(len(map_events["events"][map_event_index]["pages"] if map_events["events"][map_event_index] else []))
+			for page_index in range(len(map_events["events"][map_event_index]["pages"]) if map_events["events"][map_event_index] else 0)
 			for event_index in range(len(map_events["events"][map_event_index]["pages"][page_index]["list"]))
 			for message_path in RPGMakerMVData.event(map_events["events"][map_event_index]["pages"][page_index]["list"][event_index], f"$.events[{map_event_index}].pages[{page_index}].list[{event_index}]", events_code)
 		]
@@ -53,7 +67,7 @@ class RPGMakerMVData:
 		messages: list[str] = [
 			message_path
 			for common_event_index in range(len(events))
-			for event_index in range(len(events[common_event_index]["list"] if events[common_event_index] else []))
+			for event_index in range(len(events[common_event_index]["list"]) if events[common_event_index] else 0)
 			for message_path in RPGMakerMVData.event(events[common_event_index]["list"][event_index], f"$[{common_event_index}].list[{event_index}]", events_code)
 		]
 

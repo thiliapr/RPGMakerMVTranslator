@@ -3,10 +3,9 @@ from tprtools import jsonpath
 
 class RPGMakerMVData:
 	ItemTextsKeys: tuple[str] = ("name", "description", "note", "message1", "message2", "message3", "message4")
-	SystemJSONItemsKeys: tuple[str] = ("armorTypes", "elements", "equipTypes", "skillTypes", "weaponTypes")
 
 	@staticmethod
-	def event(event: jsonpath.JSONObject, parent_path: str, events_code: list[int]) -> list[str] | None:
+	def event(event: jsonpath.JSONObject, parent_path: str, events_code: list[int]) -> list[str]:
 		if event["code"] not in events_code:
 			return []
 
@@ -43,6 +42,10 @@ class RPGMakerMVData:
 			for message_path in RPGMakerMVData.event(map_events["events"][map_event_index]["pages"][page_index]["list"][event_index], f"$.events[{map_event_index}].pages[{page_index}].list[{event_index}]", events_code)
 		]
 
+		# Display Name
+		if map_events["displayName"]:
+			messages += "$.displayName"
+
 		return messages
 
 	@staticmethod
@@ -63,14 +66,6 @@ class RPGMakerMVData:
 		# Outside
 		messages.append("$.currencyUnit")
 		messages.append("$.gameTitle")
-
-		# Add items to messages
-		messages += [
-			f"$.{items_key}[{item_index}]"
-			for items_key in RPGMakerMVData.SystemJSONItemsKeys
-			for item_index in range(len(system_json[items_key]))
-			if system_json[items_key][item_index]
-		]
 
 		# Terms
 		messages += [

@@ -1,7 +1,8 @@
 import argparse
 import os
-from datetime import datetime
 import json
+from datetime import datetime
+from importlib import import_module
 
 from tprtools import jsonpath
 
@@ -148,8 +149,10 @@ def apply_script(data_path: str, rpgmaker_script_path: str, galtransl_script_pat
 
 	# Merge translation and path
 	rpgmaker_translations = {
-		filename: [rpgmaker_message | translation_message
-		for rpgmaker_message, translation_message in zip(rpgmaker_messages, translation_messages)]
+		filename: [
+			rpgmaker_message | translation_message
+			for rpgmaker_message, translation_message in zip(rpgmaker_messages, translation_messages)
+		]
 		for filename, rpgmaker_messages, translation_messages in zip(rpgmaker_scripts.keys(), rpgmaker_scripts.values(), galtransl_scripts.values())
 	}
 

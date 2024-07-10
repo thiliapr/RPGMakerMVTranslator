@@ -6,19 +6,15 @@ class RPGMakerMVData:
 	ItemTextsKeys: tuple[str] = ("name", "description", "note", "message1", "message2", "message3", "message4")
 
 	@staticmethod
-	def event(event: jsonpath.JSONObject, parent_path: str, events_code: list[int], **kwargs) -> list[str]:
-		if event["code"] not in events_code:
-			return []
-
+	def event(event: jsonpath.JSONObject, parent_path: str, **kwargs) -> list[str]:
 		# Choices
 		if event["code"] == 102:
 			return [jsonpath.concat_path(parent_path, f"$.parameters[0][{i}]") for i in range(len(event["parameters"][0])) if event["parameters"][0][i]]
-		# Comment
-		elif event["code"] == 108:
-			return [jsonpath.concat_path(parent_path, "$.parameters[0]")] if event["parameters"][0] else []
 		# Text
 		elif event["code"] == 401:
 			return [jsonpath.concat_path(parent_path, "$.parameters[0]")] if event["parameters"][0] else []
+		else:
+			return []
 
 	@staticmethod
 	def items(items: list, **kwargs) -> list[str]:
@@ -34,7 +30,7 @@ class RPGMakerMVData:
 		return messages
 
 	@staticmethod
-	def troops(troops: list, events_code: list[int], **kwargs) -> list[str]:
+	def troops(troops: list, **kwargs) -> list[str]:
 		messages: list[str] = RPGMakerMVData.items(troops)
 
 		# Events
@@ -43,19 +39,19 @@ class RPGMakerMVData:
 			for troop_index in range(len(troops))
 			for page_index in range(len(troops[troop_index]["pages"]) if troops[troop_index] else 0)
 			for event_index in range(len(troops[troop_index]["pages"][page_index]["list"]))
-			for message_path in RPGMakerMVData.event(troops[troop_index]["pages"][page_index]["list"][event_index], f"$[{troop_index}].pages[{page_index}].list[{event_index}]", events_code)
+			for message_path in RPGMakerMVData.event(troops[troop_index]["pages"][page_index]["list"][event_index], f"$[{troop_index}].pages[{page_index}].list[{event_index}]", **kwargs)
 		]
 
 		return messages
 
 	@staticmethod
-	def map_events(map_events: dict, events_code: list[int], **kwargs) -> list[str]:
+	def map_events(map_events: dict, **kwargs) -> list[str]:
 		messages: list[str] = [
 			message_path
 			for map_event_index in range(len(map_events["events"]))
 			for page_index in range(len(map_events["events"][map_event_index]["pages"]) if map_events["events"][map_event_index] else 0)
 			for event_index in range(len(map_events["events"][map_event_index]["pages"][page_index]["list"]))
-			for message_path in RPGMakerMVData.event(map_events["events"][map_event_index]["pages"][page_index]["list"][event_index], f"$.events[{map_event_index}].pages[{page_index}].list[{event_index}]", events_code)
+			for message_path in RPGMakerMVData.event(map_events["events"][map_event_index]["pages"][page_index]["list"][event_index], f"$.events[{map_event_index}].pages[{page_index}].list[{event_index}]", **kwargs)
 		]
 
 		# Display Name
@@ -65,12 +61,12 @@ class RPGMakerMVData:
 		return messages
 
 	@staticmethod
-	def common_events(events: list, events_code: list[int], **kwargs) -> list[str]:
+	def common_events(events: list, **kwargs) -> list[str]:
 		messages: list[str] = [
 			message_path
 			for common_event_index in range(len(events))
 			for event_index in range(len(events[common_event_index]["list"]) if events[common_event_index] else 0)
-			for message_path in RPGMakerMVData.event(events[common_event_index]["list"][event_index], f"$[{common_event_index}].list[{event_index}]", events_code)
+			for message_path in RPGMakerMVData.event(events[common_event_index]["list"][event_index], f"$[{common_event_index}].list[{event_index}]")
 		]
 
 		return messages

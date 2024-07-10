@@ -13,7 +13,7 @@ requirements:
 thiliapr-tools
 """
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 
 def log(message: str, verbose: bool = False) -> None:
@@ -37,7 +37,7 @@ def create_dir(at: str):
 	os.makedirs(at)
 
 
-def extract_script(data_path: str, output_path: str, events_code: list[int], verbose: bool = False):
+def extract_script(data_path: str, output_path: str, verbose: bool = False):
 	# Read data files from data path
 	log(f"Loading Data...")
 
@@ -62,7 +62,7 @@ def extract_script(data_path: str, output_path: str, events_code: list[int], ver
 		if verbose:
 			log(f"Extracting {filename}", verbose=True)
 
-		messages[filename] = RPGMakerMVData.extract_data(filename, data, events_code=events_code)
+		messages[filename] = RPGMakerMVData.extract_data(filename, data)
 
 	log(f"Extracted data.")
 
@@ -173,12 +173,9 @@ def main():
 	parser.add_argument("-s", "--rpgmaker-script", help="RPGMaker Script Path (extract, galtransl, apply)")
 	parser.add_argument("-g", "--galtransl-script", help="GalTransl Script Path (galtransl, apply)")
 	parser.add_argument("-t", "--translated-data", help="Translated Data Path (apply)")
-	parser.add_argument("-e", "--only-needed-events", action="store_true", help="Translate only displayable events.")
 	parser.add_argument("-v", "--verbose", action="store_true", default=False)
 	parser.add_argument("-V", "--version", action="version", version=__version__, help="Show version")
 	args = parser.parse_args()
-
-	events_code: list[int] = [102, 401] if args.only_needed_events else [102, 108, 401]
 
 	# Create working directory
 	create_dir(args.rpgmaker_script) if args.rpgmaker_script else None
@@ -187,7 +184,7 @@ def main():
 
 	# Do command
 	if args.action == "extract":
-		extract_script(args.data, args.rpgmaker_script, events_code, args.verbose)
+		extract_script(args.data, args.rpgmaker_script, args.verbose)
 	elif args.action == "galtransl":
 		generate_galtransl_script(args.rpgmaker_script, args.galtransl_script, args.verbose)
 	elif args.action == "apply":

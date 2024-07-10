@@ -18,14 +18,15 @@ class RPGMakerMVData:
 		# Text
 		elif event["code"] == 401 and event["parameters"][0]:
 			message: dict[str, Any] = {
-				"message": event["parameters"][0],
-				"path": jsonpath.concat_path(parent_path, "$.parameters[0]")
+				"path": jsonpath.concat_path(parent_path, "$.parameters[0]"),
+				"message": event["parameters"][0]
 			}
 
 			# With Name
-			if message["message"].startswith("\\n<"):
-				message["name"] = message["message"][3:message["message"].find(">")]
-				message["message"] = message["message"][message["message"].find(">") + 1:]
+			context: str = message["message"]
+			if context.strip().startswith("\\n<"):
+				message["name"] = context[context.find("<") + 1:context.find(">")]
+				message["message"] = context[context.find(">") + 1:]
 
 			# Add message info to messages
 			messages.append(message)
@@ -36,7 +37,7 @@ class RPGMakerMVData:
 	@staticmethod
 	def items(items: list, **kwargs) -> list[dict[str, Any]]:
 		messages: list[dict[str, Any]] = [
-			{"message": jsonpath.get(items, path), "path": path}
+			{"path": path, "message": jsonpath.get(items, path)}
 			for item_index in range(len(items))
 			for path in (
 				[f"$[{item_index}].{key}" for key in RPGMakerMVData.ItemTextsKeys if items[item_index].get(key)]
@@ -100,7 +101,7 @@ class RPGMakerMVData:
 			if system_json["terms"][term_key][item_key]
 		]
 
-		return [{"message": jsonpath.get(system_json, path), "path": path} for path in paths]
+		return [{"path": path, "message": jsonpath.get(system_json, path)} for path in paths]
 
 	@staticmethod
 	def extract_data(filename: str, data: jsonpath.JSONObject, **kwargs) -> list[dict[str, Any]]:

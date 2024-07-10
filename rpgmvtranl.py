@@ -62,16 +62,7 @@ def extract_script(data_path: str, output_path: str, events_code: list[int], ver
 		if verbose:
 			log(f"Extracting {filename}", verbose=True)
 
-		if filename == "CommonEvents.json":
-			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.common_events(data, events_code)]
-		elif filename == "System.json":
-			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.system_json(data)]
-		elif filename == "Troops.json":
-			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.troops(data, events_code)]
-		elif isinstance(data, list):
-			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.items(data)]
-		elif isinstance(data, dict):
-			messages[filename] = [{"path": message_path, "message": jsonpath.get(data, message_path)} for message_path in RPGMakerMVData.map_events(data, events_code)]
+		messages[filename] = RPGMakerMVData.extract_data(filename, data, events_code=events_code)
 
 	log(f"Extracted data.")
 

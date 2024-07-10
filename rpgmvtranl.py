@@ -8,11 +8,6 @@ from tprtools import jsonpath
 
 from utils.rpgmv import RPGMakerMVData
 
-"""
-requirements:
-thiliapr-tools
-"""
-
 __version__ = "1.0.2"
 
 

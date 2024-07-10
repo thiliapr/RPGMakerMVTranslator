@@ -1,7 +1,7 @@
 # Usage
 ## Basic introduction
 ```shell
-python rpgmvtransl.py -d $original_data -s $rpgmaker_script -t $translated_data [-e]
+python rpgmvtransl.py -d $original_data -s $rpgmaker_script -t $translated_data
 ```
 - Parameters
   - `-d`, `--data`: Path to the game's `data` folder.

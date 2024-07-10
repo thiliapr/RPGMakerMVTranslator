@@ -1,7 +1,7 @@
 # 用法
 ## 基本介绍
 ```shell
-python rpgmvtransl.py -d $original_data -s $rpgmaker_script -t $translated_data [-e]
+python rpgmvtransl.py -d $original_data -s $rpgmaker_script -t $translated_data
 ```
 - 参数
   - `-d`, `--data`: 游戏的`data`文件夹路径。

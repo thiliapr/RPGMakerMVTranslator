@@ -10,7 +10,7 @@ python rpgmvtransl.py -d $original_data -s $rpgmaker_script -t $translated_data
 
 ## Usage steps
 1. Extract game data.
-2. Export data to [TkTransl][TkTranslRepo] for translation.
+2. Export data to [TkTransl](https://github.com/thiliapr/TkTransl) for translation.
 3. Inject translation into game data.
 4. Copy data to game directory, overwriting original files. (It is best to create a backup first)
 
@@ -29,5 +29,3 @@ python rpgmvtransl.py -d /Game/RPGMakerMX/example/www/data -s /tktransl/projects
 cp -r /Game/RPGMakerMX/example/www/data /Game/RPGMakerMX/example/www/data.bak
 cp -rf /working/tdata /Game/RPGMakerMX/example/www/data
 ```
-
-[TkTranslRepo]: https://github.com/thiliapr/TkTransl

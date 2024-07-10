@@ -104,7 +104,7 @@ class RPGMakerMVData:
 			extract_func = RPGMakerMVData.system_json
 		elif filename == "Troops.json":
 			extract_func = RPGMakerMVData.troops
-		elif filename.startswith("Map") and filename[3:-5].isdigit():
+		elif filename.startswith("Map") and filename[3:-5].isdecimal():
 			extract_func = RPGMakerMVData.map_events
 		elif isinstance(data, list):
 			extract_func = RPGMakerMVData.items

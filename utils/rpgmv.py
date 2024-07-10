@@ -74,7 +74,7 @@ class RPGMakerMVData:
 
 		# Display Name
 		if map_events["displayName"]:
-			messages += "$.displayName"
+			messages.append({"path": "$.displayName", "message": map_events["displayName"]})
 
 		return messages
 

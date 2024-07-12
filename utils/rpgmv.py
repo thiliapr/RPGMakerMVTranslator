@@ -56,7 +56,7 @@ class RPGMakerMVData:
             message
             for troop_index, troop in enumerate(troops)
             for page_index, page in (enumerate(troop["pages"]) if troop else tuple())
-            for event_index, event in enumerate(len(page["list"]))
+            for event_index, event in enumerate(page["list"])
             for message in RPGMakerMVData.event(event, f"$[{troop_index}].pages[{page_index}].list[{event_index}]", **kwargs)
         ]
 
@@ -83,7 +83,7 @@ class RPGMakerMVData:
         messages: list[dict[str, Any]] = [
             message
             for common_event_index, common_event in enumerate(events)
-            for event_index, event in range(enumerate(common_event["list"]) if common_event else tuple())
+            for event_index, event in (enumerate(common_event["list"]) if common_event else tuple())
             for message in RPGMakerMVData.event(event, f"$[{common_event_index}].list[{event_index}]")
         ]
 
@@ -95,8 +95,8 @@ class RPGMakerMVData:
 
         # Terms
         paths += [
-            f"$.terms.{term_key}.{('[%s]' if isinstance(term, list) else '%s') % item_key}"
-            for term_key, term in enumerate(system_json["terms"])
+            f"$.terms.{term_key}{('[%s]' if isinstance(term, list) else '.%s') % item_key}"
+            for term_key, term in system_json["terms"].items()
             for item_key, item in (term.items() if isinstance(term, dict) else enumerate(term))
             if item
         ]

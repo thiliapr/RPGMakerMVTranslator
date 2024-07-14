@@ -14,18 +14,18 @@ class RPGMakerMVData:
         # Choices
         if event["code"] == 102:
             paths = [f"$.parameters[0][{i}]" for i in range(len(event["parameters"][0])) if event["parameters"][0][i]]
-            return [{"message": jsonpath.get(event, path), "path": jsonpath.concat_path(parent_path, path)} for path in paths]
+            return [{"message": jsonpath.get(event, path), "identifier": jsonpath.concat_path(parent_path, path)} for path in paths]
         # Text
         elif event["code"] == 401 and event["parameters"][0]:
             message: dict[str, Any] = {
-                "path": jsonpath.concat_path(parent_path, "$.parameters[0]"),
+                "identifier": jsonpath.concat_path(parent_path, "$.parameters[0]"),
                 "message": event["parameters"][0]
             }
 
             # With Name
             context: str = message["message"]
             if context.strip().startswith("\\n<"):
-                message["name"] = context[context.find("<") + 1:context.find(">")]
+                message["speaker"] = context[context.find("<") + 1:context.find(">")]
                 message["message"] = context[context.find(">") + 1:]
 
             # Add message info to messages
@@ -37,7 +37,7 @@ class RPGMakerMVData:
     @staticmethod
     def items(items: list, **kwargs) -> list[dict[str, Any]]:
         messages: list[dict[str, Any]] = [
-            {"path": path, "message": jsonpath.get(items, path)}
+            {"identifier": path, "message": jsonpath.get(items, path)}
             for item_index, item in enumerate(items)
             for path in (
                 [f"$[{item_index}].{key}" for key in RPGMakerMVData.ItemTextsKeys if item.get(key)]
@@ -74,7 +74,7 @@ class RPGMakerMVData:
 
         # Display Name
         if map_events["displayName"]:
-            messages.append({"path": "$.displayName", "message": map_events["displayName"]})
+            messages.append({"identifier": "$.displayName", "message": map_events["displayName"]})
 
         return messages
 
@@ -101,7 +101,7 @@ class RPGMakerMVData:
             if item
         ]
 
-        return [{"path": path, "message": jsonpath.get(system_json, path)} for path in paths]
+        return [{"identifier": path, "message": jsonpath.get(system_json, path)} for path in paths]
 
     @staticmethod
     def extract_data(filename: str, data: jsonpath.JSONObject, **kwargs) -> list[dict[str, Any]]:

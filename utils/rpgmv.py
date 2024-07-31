@@ -118,6 +118,8 @@ class RPGMakerMVData:
             extract_func = RPGMakerMVData.map_events
         elif isinstance(data, list):
             extract_func = RPGMakerMVData.items
+        else:
+            return []
 
         # Run
         return extract_func(data, **kwargs)

@@ -32,7 +32,6 @@ def create_dir(at: str):
 
 
 def extract_script(data_path: str, output_path: str, verbose: bool = False):
-    # Read data files from data path
     log(f"Extracting Data...")
 
     for filename in os.listdir(data_path):
@@ -44,11 +43,11 @@ def extract_script(data_path: str, output_path: str, verbose: bool = False):
             log(f"Extracting {filename}", verbose=True)
 
         # 加载原始游戏文件
-        with open(os.path.join(data_path, filename), mode="r", encoding="utf-8") as f:
+        with open(os.path.join(data_path, filename), mode="r", encoding="utf-8-sig") as f:
             data: jsonpath.JSONObject = json.load(f)
 
         # 提取游戏文本
-        messages = RPGMakerMVData.extract_data(filename, data)
+        messages = [{k: v for k, v in {"message": msg["message"], "speaker": msg.get("speaker"), "additional_info": msg["path"]}.items() if v is not None} for msg in RPGMakerMVData.extract_data(filename, data)]
 
         # 如果什么也没有提取到，就跳过这个文件
         if not messages:
@@ -62,7 +61,6 @@ def extract_script(data_path: str, output_path: str, verbose: bool = False):
 
 
 def apply_script(data_path: str, rpgmaker_script_path: str, output_path: str, verbose: bool = False):
-    # Read data files from data path
     log(f"Applying Data...")
 
     for filename in os.listdir(rpgmaker_script_path):
@@ -71,10 +69,10 @@ def apply_script(data_path: str, rpgmaker_script_path: str, output_path: str, ve
 
         # 展示进度
         if verbose:
-            log(f"Loading {filename}", verbose=True)
+            log(f"Applying {filename}", verbose=True)
 
         # 加载原始游戏文件
-        with open(os.path.join(data_path, filename), mode="r", encoding="utf-8") as f:
+        with open(os.path.join(data_path, filename), mode="r", encoding="utf-8-sig") as f:
             data: jsonpath.JSONObject = json.load(f)
 
         # 加载翻译文件
@@ -85,15 +83,15 @@ def apply_script(data_path: str, rpgmaker_script_path: str, output_path: str, ve
         for message in rpgmaker_script:
             try:
                 # 假设有说话的人
-                destination = f"\\n<{message['speaker']}>{message['message']}"
+                destination = f"\\n<{message['speaker_translation']}>{message['translation']}"
             except KeyError:
                 # 如果没有就只是译文
-                destination = message["message"]
+                destination = message["translation"]
 
-            jsonpath.assign(data, message["identifier"], destination)
+            jsonpath.assign(data, message["additional_info"], destination)
 
         # 导出游戏文件
-        with open(os.path.join(output_path, filename), encoding="utf-8", mode="w") as f:
+        with open(os.path.join(output_path, filename), encoding="utf-8-sig", mode="w") as f:
             json.dump(data, f, indent="\t", ensure_ascii=False)
 
 

@@ -47,7 +47,15 @@ def extract_script(data_path: str, output_path: str, verbose: bool = False):
             data: jsonpath.JSONObject = json.load(f)
 
         # 提取游戏文本
-        messages = [{k: v for k, v in {"message": msg["message"], "speaker": msg.get("speaker"), "additional_info": msg["path"]}.items() if v is not None} for msg in RPGMakerMVData.extract_data(filename, data)]
+        messages = [
+            {k: v for k, v in {
+                "source": msg["message"],
+                "speaker": msg.get("speaker"),
+                "path": msg["path"]
+            }.items() if v is not None}
+            for msg in RPGMakerMVData.extract_data(filename, data)
+            if "<" not in msg["message"]
+        ]
 
         # 如果什么也没有提取到，就跳过这个文件
         if not messages:
@@ -83,12 +91,12 @@ def apply_script(data_path: str, rpgmaker_script_path: str, output_path: str, ve
         for message in rpgmaker_script:
             try:
                 # 假设有说话的人
-                destination = f"\\n<{message['speaker_translation']}>{message['translation']}"
+                destination = f"\\n<{message['target_speaker']}>{message['target']}"
             except KeyError:
                 # 如果没有就只是译文
-                destination = message["translation"]
+                destination = message["target"]
 
-            jsonpath.assign(data, message["additional_info"], destination)
+            jsonpath.assign(data, message["path"], destination)
 
         # 导出游戏文件
         with open(os.path.join(output_path, filename), encoding="utf-8-sig", mode="w") as f:
